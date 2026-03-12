@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="view_applicant_form" model="ir.ui.view">
+        <field name="name">ats.applicant.form</field>
+        <field name="model">ats.applicant</field>
+        <field name="arch" type="xml">
+
+            <form string="Applicant">
+                <header>
+                    <field name="stage_id" widget="statusbar" options="{'clickable': '1'}"/>
+                </header>
+
+                <sheet>
+                    <group>
+                        <group>
+
+                            <field name="name" readonly="is_stage_readonly"/>
+                            <field name="task_id" readonly="is_stage_readonly"/>
+                            <field name="recruiter_id" readonly="is_stage_readonly"/>
+                            <field name="interview_status" readonly="1" string="Status"/>
+                        </group>
+
+                        <group>
+
+                            <field name="mobile" readonly="is_stage_readonly"/>
+                            <field name="mobile2" string="Alternate Mobile" readonly="is_stage_readonly"/>
+                            <field name="email" readonly="is_stage_readonly"/>
+                            <field name="linkedin_url" readonly="is_stage_readonly"/>
+
+                        </group>
+                    </group>
+
+                    <group>
+                        <field name="tag_ids" widget="many2many_tags" readonly="is_stage_readonly"/>
+
+                    </group>
+
+                    <notebook>
+
+                        <page string="Resume">
+
+                            <field name="resume"
+                                   filename="resume_filename"
+                                   widget="pdf_viewer" required="1" readonly="is_stage_readonly"/>
+
+                        </page>
+
+                        <page string="Evaluation">
+
+                            <field name="evaluation" placeholder="Write your evaluation here..." readonly="is_stage_readonly"/>
+
+                        </page>
+
+                    </notebook>
+
+                </sheet>
+
+                <chatter/>
+
+            </form>
+
+        </field>
+    </record>
+
+    <record id="view_applicant_tree" model="ir.ui.view">
+        <field name="name">ats.applicant.tree</field>
+        <field name="model">ats.applicant</field>
+        <field name="arch" type="xml">
+            <list string="Applicants">
+                <field name="name"/>
+                <field name="task_id"/>
+                <field name="stage_id"/>
+                <field name="recruiter_id"/>
+                <field name="mobile"/>
+                <field name="email"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_applicant_kanban" model="ir.ui.view">
+    <field name="name">ats.applicant.kanban</field>
+    <field name="model">ats.applicant</field>
+    <field name="arch" type="xml">
+        <kanban class="o_kanban_small_column" default_group_by="stage_id" quick_create="false"
+                records_draggable="false">
+
+            <!-- Fields -->
+            <field name="name"/>
+            <field name="task_id"/>
+            <field name="stage_id"/>
+            <field name="recruiter_id"/>
+
+            <templates>
+                <t t-name="card">
+                    <div class="oe_kanban_global_click o_kanban_record p-3 border rounded shadow-sm mb-2">
+
+                        <!-- Applicant Name -->
+                        <strong class="d-block fs-5 mb-1 text-primary">
+                            <field name="name"/>
+                        </strong>
+
+                        <!-- Job / Task -->
+                        <div class="text-muted mb-1">
+                            <i class="fa fa-briefcase me-1"/>
+                            <field name="task_id"/>
+                        </div>
+
+                        <!-- Recruiter -->
+                        <div class="mb-1">
+                            <i class="fa fa-user me-1"/>
+                            <field name="recruiter_id"/>
+                        </div>
+
+                        <!-- Stage -->
+                        <div>
+                            <span class="badge text-bg-info">
+                                <field name="stage_id"/>
+                            </span>
+                        </div>
+
+                    </div>
+                </t>
+            </templates>
+        </kanban>
+    </field>
+</record>
+
+    <!-- Custom Search View for Applicants -->
+<record id="view_applicant_search" model="ir.ui.view">
+    <field name="name">ats.applicant.search</field>
+    <field name="model">ats.applicant</field>
+    <field name="arch" type="xml">
+        <search>
+            <!-- Quick search fields -->
+            <field name="name"/>
+            <field name="email"/>
+            <field name="mobile"/>
+
+            <!-- Filters -->
+            <filter name="open_tasks" string="Open Tasks"
+                    domain="[('task_id.position_state','=','open')]"/>
+            <filter name="closed_tasks" string="Closed Tasks"
+                    domain="[('task_id.position_state','=','closed')]"/>
+
+            <group>
+
+                    <filter name="group_stage_id"
+                            string="state"
+                            context="{'group_by':'stage_id'}"/>
+
+                    <filter name="group_task"
+                            string="Job Positions"
+                            context="{'group_by':'task_id'}"/>
+
+                    <filter name="group_recruiter"
+                            string="Recruiter"
+                            context="{'group_by':'recruiter_id'}"/>
+
+                </group>
+
+            <!-- Field filters (optional dropdowns) -->
+            <field name="recruiter_id"/>
+            <field name="task_id"/>
+            <field name="stage_id"/>
+        </search>
+    </field>
+</record>
+
+
+    <record id="action_applicants" model="ir.actions.act_window">
+        <field name="name">Applications</field>
+        <field name="res_model">ats.applicant</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="search_view_id" ref="view_applicant_search"/>
+        <field name="context">{'search_default_group_task': 1}</field>
+        <field name="view_ids" eval="[
+        (5,0,0),
+            (0,0,{'view_mode':'kanban','view_id':ref('view_applicant_kanban')}),
+            (0,0,{'view_mode':'list','view_id':ref('view_applicant_tree')}),
+            (0,0,{'view_mode':'form','view_id':ref('view_applicant_form')})
+        ]"/>
+    </record>
+
+    <!-- Applications Menu -->
+    <menuitem id="menu_ats_applications"
+              name="Applications"
+              parent="menu_ats_root"
+              action="action_applicants"
+              sequence="10"/>
+</odoo>

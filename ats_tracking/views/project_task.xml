@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+<record id="view_task_form_ats" model="ir.ui.view">
+    <field name="name">project.task.form.ats</field>
+    <field name="model">project.task</field>
+    <field name="inherit_id" ref="project.view_task_form2"/>
+    <field name="arch" type="xml">
+        <xpath expr="//div[@name='button_box']" position="inside">
+
+            <button name="action_view_applicants"
+                    type="object"
+                    class="oe_stat_button"
+                    icon="fa-users">
+
+                <field name="applicant_count"
+                       widget="statinfo"
+                       string="Applications"/>
+
+            </button>
+
+        </xpath>
+
+        <xpath expr="//sheet/notebook" position="before">
+            <group string="Recruitment">
+                <group>
+
+                    <field name="recruitment_manager_id"
+                           readonly="1"/>
+
+                    <field name="team_member_ids"
+                           widget="many2many_tags"
+                           readonly="1"/>
+
+                    <field name="contact_id" readonly="is_active_stage==True or recruitment_manager_id!=uid"/>
+
+                </group>
+                <group>
+                    <field name="opened_positions" readonly="recruitment_manager_id!=uid"/>
+
+                    <field name="closed_positions"/>
+                    <field name="remaining_positions"/>
+
+                    <field name="days_open" readonly="1"/>
+                    <field name="delayed_days"/>
+
+                    <field name="applicant_stage_ids" widget="many2many_tags" readonly="recruitment_manager_id!=uid"/>
+                </group>
+            </group>
+
+        </xpath>
+
+        <xpath expr="//field[@name='date_deadline']" position="attributes">
+            <attribute name="readonly">is_active_stage==True or recruitment_manager_id!=uid</attribute>
+            <attribute name="required">True</attribute>
+        </xpath>
+        <xpath expr="//field[@name='partner_id']" position="attributes">
+            <attribute name="readonly">is_active_stage==True or recruitment_manager_id!=uid</attribute>
+        </xpath>
+        <xpath expr="//field[@name='tag_ids']" position="attributes">
+            <attribute name="readonly">is_active_stage==True or recruitment_manager_id!=uid</attribute>
+        </xpath>
+        <xpath expr="//field[@name='user_ids']" position="attributes">
+            <attribute name="readonly">1</attribute>
+            <attribute name="force_save">1</attribute>
+        </xpath>
+        <xpath expr="//page[@name='sub_tasks_page']" position="replace"/>
+        <xpath expr="//page[@name='extra_info']" position="replace"/>
+        <xpath expr="//header" position="inside">
+            <field name="position_state" widget="statusbar"/>
+            <button name="action_add_team_member"
+                    string="Add Team Member"
+                    type="object"
+                    class="btn-primary"
+                    groups="ats_tracking.group_ats_admin"
+            />
+            <button name="action_change_manager"
+                    string="Add Manager"
+                    type="object"
+                    class="btn-primary"
+                    groups="ats_tracking.group_ats_admin"
+            />
+            <button name="action_open"
+                string="Open"
+                type="object"
+                class="btn-primary"
+                invisible="position_state == 'open' or position_state == 'closed'"/>
+
+            <button name="action_pause"
+                    string="Pause"
+                    type="object"
+                    class="btn-warning"
+                    invisible="position_state == 'paused' or position_state == 'closed' or position_state == 'draft'"/>
+
+            <button name="action_close"
+                    string="Close"
+                    type="object"
+                    class="btn-danger"
+                    invisible="position_state == 'closed' or position_state == 'closed' or position_state == 'draft'"/>
+
+        </xpath>
+
+    </field>
+</record>
+
+    <record id="view_task_kanban_ats" model="ir.ui.view">
+    <field name="name">project.task.kanban.ats</field>
+    <field name="model">project.task</field>
+    <field name="arch" type="xml">
+
+        <kanban class="o_kanban_small_column"
+                records_draggable="true"
+                default_group_by="position_state" quick_create="false">
+
+            <field name="name"/>
+            <field name="project_id"/>
+            <field name="recruitment_manager_id"/>
+            <field name="opened_positions"/>
+            <field name="closed_positions"/>
+            <field name="remaining_positions"/>
+            <field name="applicant_count"/>
+
+            <templates>
+
+                <t t-name="card">
+
+                    <div class="oe_kanban_global_click o_kanban_record">
+
+                        <div class="o_kanban_details">
+
+                            <!-- Job Title -->
+                            <strong class="o_kanban_record_title">
+                                <field name="name"/>
+                            </strong>
+
+                            <!-- Project -->
+                            <div class="text-muted mt4">
+                                <i class="fa fa-building" style="margin-right:5px;"/>
+                                <field name="project_id"/>
+                            </div>
+
+                            <!-- Recruiter -->
+                            <div class="mt4">
+                                <i class="fa fa-user mr-3" style="margin-right:5px;"/>
+                                <field name="recruitment_manager_id"/>
+                            </div>
+
+                            <!-- Positions -->
+                            <div class="mt8">
+
+                                <span class="badge bg-primary">
+                                    Open:
+                                    <field name="opened_positions"/>
+                                </span>
+
+                                <span class="badge bg-secondary">
+                                    Closed:
+                                    <field name="closed_positions"/>
+                                </span>
+
+                            </div>
+
+                            <!-- Applications -->
+                            <div class="mt8 d-flex align-items-center">
+
+                                <button type="object"
+                                        name="action_view_applicants"
+                                        class="btn btn-primary btn-sm">
+                                    Applications
+                                </button>
+
+                                <span class="badge bg-info ms-2">
+                                    <field name="applicant_count"/>
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </t>
+
+            </templates>
+
+        </kanban>
+
+    </field>
+</record>
+
+    <record id="view_task_tree_ats" model="ir.ui.view">
+    <field name="name">project.task.tree.ats</field>
+    <field name="model">project.task</field>
+    <field name="arch" type="xml">
+        <list string="Job Positions">
+
+            <field name="name" string="Job Title"/>
+
+            <field name="project_id" string="Project"/>
+
+            <field name="recruitment_manager_id" string="Recruiter"/>
+
+            <field name="opened_positions"/>
+
+            <field name="closed_positions"/>
+            <field name="remaining_positions"/>
+
+
+            <field name="applicant_count" string="Applications"/>
+
+            <field name="position_state" string="State"/>
+
+        </list>
+    </field>
+</record>
+
+    <record id="view_task_search_ats" model="ir.ui.view">
+        <field name="name">project.task.search.ats</field>
+        <field name="model">project.task</field>
+        <field name="arch" type="xml">
+
+            <search string="Search Jobs">
+
+                <!-- Search Fields -->
+                <field name="name" string="Job Title"/>
+                <field name="project_id"/>
+                <field name="recruitment_manager_id"/>
+
+                <!-- Filters -->
+                <filter name="filter_open"
+                        string="Open Jobs"
+                        domain="[('position_state','=','open')]"/>
+
+                <filter name="filter_paused"
+                        string="Paused Jobs"
+                        domain="[('position_state','=','paused')]"/>
+
+                <filter name="filter_closed"
+                        string="Closed Jobs"
+                        domain="[('position_state','=','closed')]"/>
+
+                <!-- Group By -->
+                <group>
+
+                    <filter name="group_project"
+                            string="Project"
+                            context="{'group_by':'project_id'}"/>
+
+                    <filter name="group_recruiter"
+                            string="Recruiter"
+                            context="{'group_by':'recruitment_manager_id'}"/>
+
+                    <filter name="group_state"
+                            string="State"
+                            context="{'group_by':'position_state'}"/>
+
+                </group>
+
+            </search>
+
+        </field>
+    </record>
+
+    <record id="action_task_job_positions" model="ir.actions.act_window">
+        <field name="name">Open Jobs</field>
+        <field name="res_model">project.task</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="search_view_id" ref="view_task_search_ats"/>
+        <field name="context">{'search_default_filter_open': 1}</field>
+        <field name="view_ids" eval="[
+            (5,0,0),
+            (0,0,{'view_mode':'kanban','view_id':ref('view_task_kanban_ats')}),
+            (0,0,{'view_mode':'list','view_id':ref('view_task_tree_ats')})
+        ]"/>
+    </record>
+
+    <menuitem id="menu_ats_jobs"
+          name="Open Jobs"
+          parent="menu_ats_root"
+          action="action_task_job_positions"
+          sequence="10"/>
+
+</odoo>

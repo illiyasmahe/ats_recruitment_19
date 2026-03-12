@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="view_task_team_member_wizard" model="ir.ui.view">
+        <field name="name">task.team.member.wizard.form</field>
+        <field name="model">task.team.member.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Add Team Member">
+                <sheet>
+                    <group>
+                        <field name="user_ids" widget="many2many_tags"/>
+                    </group>
+                    <footer>
+                        <button string="Add" type="object" name="add_selected_users" class="btn-primary"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_task_manager_wizard_form" model="ir.ui.view">
+        <field name="name">task.manager.wizard.form</field>
+        <field name="model">task.manager.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Assign Manager">
+                <sheet>
+                    <group>
+                        <field name="manager_id"/>
+                    </group>
+                    <footer>
+                        <button string="Assign" type="object" name="assign_manager" class="btn-primary"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>
