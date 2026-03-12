@@ -119,12 +119,12 @@ class AtsApplicant(models.Model):
     stage_status_str = fields.Char(
         string="Stage Status",
         compute='_compute_stage_status_str',
-        store=True
+        store=False
     )
 
-    @api.depends('stage_id')
     def _compute_stage_status_str(self):
         for rec in self:
+            print(rec.stage_id.is_rejected)
             if rec.stage_id:
                 if getattr(rec.stage_id, 'is_hired', False):
                     rec.stage_status_str = 'Hired'
