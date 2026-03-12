@@ -21,22 +21,25 @@
 #############################################################################
 {
     'name': 'ATS Management',
-    'version': '19.0.0.0.1',
+    'version': '19.0.0.0.2',
     'category': 'Recruitment Maanagement',
     'sequence': 2,
     'website': 'https://www.alhodood.com/',
     'author': 'Alhodood Technologies',
     'summary': 'Recruitment Maanagement',
     'description': 'Recruitment Maanagement ',
-    'depends': ['project','crm'],
+    'depends': ['project','accountant','l10n_ae'],
     'data': [
         'security/ir.model.access.csv',
         'security/security.xml',
         'views/project_views.xml',
         'views/applicant_stage_views.xml',
         'views/project_task.xml',
+        'views/product_view.xml',
         'views/applicant_view.xml',
+        'views/account_move_views.xml',
         'wizard/task_wizards.xml',
+        'wizard/recruitment_invoice_wizard.xml',
     ],
     'demo': [
     ],

@@ -21,6 +21,7 @@
 #############################################################################
 from odoo import models, fields, api
 from datetime import date
+from odoo.exceptions import UserError
 
 class ProjectTask(models.Model):
     _inherit = "project.task"
@@ -85,10 +86,85 @@ class ProjectTask(models.Model):
         help="Number of days the task is past its deadline"
     )
 
+    invoice_ids = fields.One2many(
+        'account.move',
+        'task_id',
+        string="Invoices"
+    )
+
+    invoice_count = fields.Integer(
+        compute="_compute_invoice_count",
+        string="Invoice Count"
+    )
+
+    invoiced_positions = fields.Integer(
+        string="Invoiced Positions",
+        default=0
+    )
+
+    invoiceable_positions = fields.Integer(
+        string="Positions To Invoice",
+        compute="_compute_invoiceable_positions"
+    )
+
+    @api.depends('invoice_ids')
+    def _compute_invoice_count(self):
+        for rec in self:
+            rec.invoice_count = len(rec.sudo().invoice_ids)
+
+    @api.depends('closed_positions', 'invoiced_positions')
+    def _compute_invoiceable_positions(self):
+        for rec in self:
+            rec.invoiceable_positions = rec.closed_positions - rec.invoiced_positions
+
+    def action_create_invoice(self):
+        """Create invoice based on closed positions"""
+        self.ensure_one()
+
+        if self.invoiceable_positions <= 0:
+            raise UserError("No positions available to invoice.")
+
+        product = self.env['product.template'].search([
+            ('is_recruitment_service', '=', True)
+        ], limit=1).product_variant_id
+
+
+        if not product:
+            raise UserError("Please create a product named 'Recruitment Service'.")
+
+        if not self.partner_id:
+            raise UserError("Customer is required to create invoice.")
+
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Create Invoice',
+            'res_model': 'recruitment.invoice.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_task_id': self.id,
+                'default_partner_id': self.partner_id.id,
+                'default_qty': self.invoiceable_positions
+            }
+        }
+
+    def action_view_invoices(self):
+        """Open invoices related to this job"""
+        self.ensure_one()
+
+        return {
+            'name': 'Invoices',
+            'type': 'ir.actions.act_window',
+            'res_model': 'account.move',
+            'view_mode': 'list,form',
+            'domain': [('task_id', '=', self.id)],
+            'context': {'default_task_id': self.id,'create':False},
+        }
+
     @api.depends('project_id')
     def _compute_closed_positions(self):
         """Count of applicants in 'Hired' stage"""
-        hired_stage = self.env['ats.applicant.stage'].search([('name', '=', 'Hired')], limit=1)
+        hired_stage = self.env['ats.applicant.stage'].search([('is_hired', '=', True)], limit=1)
         for rec in self:
             if hired_stage:
                 rec.closed_positions = self.env['ats.applicant'].search_count([

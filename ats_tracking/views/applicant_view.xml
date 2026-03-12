@@ -11,6 +11,13 @@
                 </header>
 
                 <sheet>
+                    <div class="o_row d-flex justify-content-end mb-2">
+                        <field name="invoice_status"
+                               widget="badge"
+                               decoration-info="invoice_status == 'not_invoiced'"
+                               decoration-success="invoice_status == 'invoiced'"
+                               readonly="1"/>
+                    </div>
                     <group>
                         <group>
 
@@ -69,7 +76,8 @@
             <list string="Applicants">
                 <field name="name"/>
                 <field name="task_id"/>
-                <field name="stage_id"/>
+                <field name="stage_id" widget="badge" decoration-success="stage_status_str == 'Hired'"
+                       decoration-danger="stage_status_str == 'Rejected'" decoration-info="stage_status_str == 'In Progress'"/>
                 <field name="recruiter_id"/>
                 <field name="mobile"/>
                 <field name="email"/>
@@ -88,6 +96,7 @@
             <field name="name"/>
             <field name="task_id"/>
             <field name="stage_id"/>
+            <field name="stage_status_str"/>
             <field name="recruiter_id"/>
 
             <templates>
@@ -113,7 +122,13 @@
 
                         <!-- Stage -->
                         <div>
-                            <span class="badge text-bg-info">
+                            <span  t-att-class=" 'badge ' + (
+                                    record.stage_status_str ?
+                                        (record.stage_status_str.raw_value === 'Hired' ? 'text-bg-success' :
+                                         record.stage_status_str.raw_value === 'Rejected' ? 'text-bg-danger' :
+                                         'text-bg-info')
+                                        : 'text-bg-info'
+                                )">
                                 <field name="stage_id"/>
                             </span>
                         </div>

@@ -19,6 +19,18 @@
 
             </button>
 
+            <button name="action_view_invoices"
+                    type="object"
+                    class="oe_stat_button" invisible="invoice_count==0"
+                    groups="account.group_account_user"
+                    icon="fa-file-text-o">
+
+                <field name="invoice_count"
+                       widget="statinfo"
+                       string="Invoices"/>
+
+            </button>
+
         </xpath>
 
         <xpath expr="//sheet/notebook" position="before">
@@ -36,10 +48,10 @@
 
                 </group>
                 <group>
-                    <field name="opened_positions" readonly="recruitment_manager_id!=uid"/>
+                    <field name="opened_positions" readonly="recruitment_manager_id!=uid" string="Total Positions"/>
 
                     <field name="closed_positions"/>
-                    <field name="remaining_positions"/>
+                    <field name="remaining_positions" string="Opened Positions"/>
 
                     <field name="days_open" readonly="1"/>
                     <field name="delayed_days"/>
@@ -80,11 +92,18 @@
                     class="btn-primary"
                     groups="ats_tracking.group_ats_admin"
             />
+            <button name="action_create_invoice"
+                    string="Create Invoice"
+                    type="object"
+                    class="btn-primary"
+                    groups="account.group_account_user"
+                    invisible="position_state not in ['open','closed'] or
+                            invoiceable_positions == 0 "/>
             <button name="action_open"
                 string="Open"
                 type="object"
                 class="btn-primary"
-                invisible="position_state == 'open' or position_state == 'closed'"/>
+                invisible="position_state == 'open'"/>
 
             <button name="action_pause"
                     string="Pause"
@@ -116,6 +135,7 @@
             <field name="project_id"/>
             <field name="recruitment_manager_id"/>
             <field name="opened_positions"/>
+            <field name="position_state"/>
             <field name="closed_positions"/>
             <field name="remaining_positions"/>
             <field name="applicant_count"/>
@@ -148,9 +168,13 @@
                             <!-- Positions -->
                             <div class="mt8">
 
-                                <span class="badge bg-primary">
+                                <span t-att-class=" 'badge ' + (
+                                        record.position_state &amp;&amp; record.position_state.raw_value === 'open' ? 'text-bg-success' :
+                                        record.position_state &amp;&amp; record.position_state.raw_value === 'paused' ? 'text-bg-warning' :
+                                        'text-bg-info'
+                                    )">
                                     Open:
-                                    <field name="opened_positions"/>
+                                    <field name="remaining_positions"/>
                                 </span>
 
                                 <span class="badge bg-secondary">
@@ -200,15 +224,17 @@
 
             <field name="recruitment_manager_id" string="Recruiter"/>
 
-            <field name="opened_positions"/>
+            <field name="opened_positions" string="Total Positions"/>
 
             <field name="closed_positions"/>
-            <field name="remaining_positions"/>
+            <field name="remaining_positions" string="Opened Positions"/>
 
 
             <field name="applicant_count" string="Applications"/>
 
-            <field name="position_state" string="State"/>
+            <field name="position_state" string="State" widget="badge" decoration-success="position_state == 'open'"
+                       decoration-info="position_state == 'closed'"
+                       decoration-warning="position_state == 'paused'"/>
 
         </list>
     </field>
@@ -278,6 +304,6 @@
           name="Open Jobs"
           parent="menu_ats_root"
           action="action_task_job_positions"
-          sequence="10"/>
+          sequence="5"/>
 
 </odoo>

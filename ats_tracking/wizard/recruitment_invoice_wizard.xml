@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="view_recruitment_invoice_wizard_form" model="ir.ui.view">
+        <field name="name">recruitment.invoice.wizard.form</field>
+        <field name="model">recruitment.invoice.wizard</field>
+        <field name="arch" type="xml">
+
+            <form string="Create Invoice">
+                <group>
+
+                    <field name="task_id" readonly="1"/>
+                    <field name="applicant_ids" widget="many2many_tags" domain="[('invoice_line_id','=',False)]"
+                           options='{"no_open": True, "no_create": True}'/>
+                    <field name="partner_id" readonly="1"/>
+                    <field name="qty"/>
+
+                    <field name="price_unit"/>
+                    <field name="total_amount"/>
+
+                </group>
+
+                <footer>
+
+                    <button name="action_create_invoice"
+                            string="Create Invoice"
+                            type="object"
+                            class="btn-primary"/>
+
+                    <button string="Cancel"
+                            special="cancel"
+                            class="btn-secondary"/>
+
+                </footer>
+
+            </form>
+
+        </field>
+    </record>
+</odoo>

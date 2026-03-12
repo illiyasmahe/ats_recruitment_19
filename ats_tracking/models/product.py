@@ -19,9 +19,19 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from . import applicant_stage
-from . import project
-from . import project_task
-from . import applicant
-from . import account_move
-from . import product
+from odoo import models, fields
+
+class ProductTemplate(models.Model):
+    _inherit = "product.template"
+
+    is_recruitment_service = fields.Boolean(
+        string="Recruitment Service"
+    )
+
+class ProductProduct(models.Model):
+    _inherit = "product.product"
+
+    is_recruitment_service = fields.Boolean(
+        related="product_tmpl_id.is_recruitment_service",
+        store=True
+    )

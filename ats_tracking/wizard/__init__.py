@@ -19,4 +19,5 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
+from . import recruitment_invoice_wizard
 from . import task_wizards

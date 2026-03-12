@@ -104,6 +104,45 @@ class AtsApplicant(models.Model):
         store=True  # store=True allows using it in XML attrs
     )
 
+    invoice_line_id = fields.Many2one(
+        'account.move.line',
+        string="Invoice Line"
+    )
+
+    invoice_status = fields.Selection(
+        [('not_invoiced', 'Not Invoiced'),
+         ('invoiced', 'Invoiced')],
+        string="Invoice Status",
+        compute="_compute_invoice_status",
+        store=True
+    )
+    stage_status_str = fields.Char(
+        string="Stage Status",
+        compute='_compute_stage_status_str',
+        store=True
+    )
+
+    @api.depends('stage_id')
+    def _compute_stage_status_str(self):
+        for rec in self:
+            if rec.stage_id:
+                if getattr(rec.stage_id, 'is_hired', False):
+                    rec.stage_status_str = 'Hired'
+                elif getattr(rec.stage_id, 'is_rejected', False):
+                    rec.stage_status_str = 'Rejected'
+                else:
+                    rec.stage_status_str = 'In Progress'
+            else:
+                rec.stage_status_str = 'In Progress'
+
+    @api.depends('invoice_line_id')
+    def _compute_invoice_status(self):
+        for rec in self.sudo():
+            if rec.invoice_line_id:
+                rec.invoice_status = 'invoiced'
+            else:
+                rec.invoice_status = 'not_invoiced'
+
     @api.depends('stage_id')
     def _compute_is_stage_readonly(self):
         for rec in self:

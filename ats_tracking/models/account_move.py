@@ -19,9 +19,26 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from . import applicant_stage
-from . import project
-from . import project_task
-from . import applicant
-from . import account_move
-from . import product
+from odoo import models, fields
+
+
+class AccountMove(models.Model):
+    _inherit = "account.move"
+
+    task_id = fields.Many2one(
+        'project.task',
+        string="Job Position"
+    )
+
+class AccountMoveLine(models.Model):
+    _inherit = "account.move.line"
+
+    applicant_id = fields.Many2one(
+        'ats.applicant',
+        string="Applicant"
+    )
+
+    job_position_id = fields.Many2one(
+        'project.task',
+        string="Job Position"
+    )
