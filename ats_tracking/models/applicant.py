@@ -38,6 +38,8 @@ class AtsApplicant(models.Model):
         required=True
     )
 
+    is_general_candidate = fields.Boolean(string="General Candidate")
+
     stage_id = fields.Many2one(
         'ats.applicant.stage',
         string="Stage",
@@ -52,6 +54,10 @@ class AtsApplicant(models.Model):
 
     evaluation = fields.Text(
         string="Evaluation"
+    )
+
+    description = fields.Text(
+        string="Cover Letter"
     )
 
     mobile = fields.Char(
@@ -124,7 +130,6 @@ class AtsApplicant(models.Model):
 
     def _compute_stage_status_str(self):
         for rec in self:
-            print(rec.stage_id.is_rejected)
             if rec.stage_id:
                 if getattr(rec.stage_id, 'is_hired', False):
                     rec.stage_status_str = 'Hired'

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="res_config_settings_view_form_linkedin_block" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.linkedin.block</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="website.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <!-- Insert a new block under the sheet -->
+            <xpath expr="//block[@id='website_info_settings']" position="inside">
+                <setting>
+                    <div class="content-group">
+                        <div class="row mt16">
+                            <label class="col-lg-6 o_light_label" string="Client ID" for="linkedin_client_id"/>
+                            <field name="linkedin_client_id"/>
+                        </div>
+                        <div class="row mt16">
+                            <label class="col-lg-6 o_light_label" string="Client Secret" for="linkedin_client_secret"/>
+                            <field name="linkedin_client_secret"/>
+                        </div>
+                        <div class="row mt16">
+                            <label class="col-lg-6 o_light_label" string="Redirect URL" for="linkedin_redirect_uri"/>
+                            <field name="linkedin_redirect_uri" placeholder="https://yourdomain.com/linkedin/callback"/>
+                        </div>
+                    </div>
+                </setting>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,1011 @@
+<odoo>
+
+    <template id="job_list_page" name="Career Page">
+        <t t-call="website.layout">
+
+            <!-- HERO -->
+            <section class="career-hero text-center text-white">
+                <div class="container">
+
+                    <h1 class="display-5 fw-bold">Careers at Our Company</h1>
+
+                    <form action="/jobs" method="get" class="mt-4">
+                        <div class="row justify-content-center">
+                            <div class="col-md-6">
+
+                                <div class="input-group">
+                                    <input type="text"
+                                           name="search"
+                                           class="form-control form-control-lg"
+                                           placeholder="Search job..."
+                                           t-att-value="search"/>
+
+                                    <button class="btn btn-career">
+                                        <i class="fa fa-search"/>
+                                    </button>
+                                </div>
+
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+            </section>
+
+
+            <!-- JOB SECTION -->
+            <section class="py-5 bg-soft">
+                <div class="container">
+
+                    <div class="row">
+
+                        <!-- LEFT JOB LIST -->
+                        <div class="col-lg-7">
+
+                            <t t-foreach="jobs" t-as="job">
+
+                                <div class="card job-card mb-3 shadow-sm job-select"
+                                     t-att-data-id="job.id">
+
+                                    <div class="card-body">
+
+                                        <h5 class="fw-bold text-primary">
+                                            <t t-esc="job.name"/>
+                                        </h5>
+
+                                        <p class="text-muted">
+                                            <i class="fa fa-building me-2"/>
+                                            <t t-esc="job.project_id.name"/>
+                                        </p>
+
+                                        <div class="small text-muted">
+                                            <div>
+                                                Open:
+                                                <t t-esc="job.opened_positions"/>
+                                            </div>
+
+                                            <div>
+                                                Closed:
+                                                <t t-esc="job.closed_positions"/>
+                                            </div>
+                                        </div>
+
+
+                                        <!-- MOBILE ACTION BUTTONS -->
+                                        <div class="mt-3 d-grid gap-2 d-lg-none">
+
+                                            <a class="btn btn-sm btn-career"
+                                               t-att-href="'/jobs/' + str(job.id)">
+                                                View Details
+                                            </a>
+
+                                            <a class="btn btn-sm btn-outline-dark"
+                                               t-att-href="'/jobs/apply/' + str(job.id)">
+                                                Apply
+                                            </a>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </t>
+
+                        </div>
+
+
+                        <!-- RIGHT DETAIL PANEL (DESKTOP ONLY) -->
+                        <div class="col-lg-5 d-none d-lg-block">
+
+                            <div id="job-details-panel"
+                                 class="job-detail-panel shadow-sm p-4">
+
+                                <div class="text-center text-muted py-5">
+                                    <h5>No Job Selected</h5>
+                                    <p>Select a job from the list</p>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- PAGINATION -->
+                    <div class="mt-5 d-flex justify-content-center">
+
+                        <t t-call="website.pager">
+                            <t t-set="pager" t-value="pager"/>
+                            <t t-set="keep" t-value="keep"/>
+                        </t>
+
+                    </div>
+
+                </div>
+            </section>
+
+
+            <!-- SCRIPT -->
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+
+                    const jobCards = document.querySelectorAll(".job-select");
+                    const panel = document.getElementById("job-details-panel");
+
+                    function loadJob(jobId) {
+                        fetch("/jobs/sidebar/" + jobId)
+                            .then(response => response.text())
+                            .then(html => {
+                                panel.innerHTML = html;
+                            });
+                    }
+
+                    jobCards.forEach(function(card) {
+
+                        card.addEventListener("click", function() {
+
+                            /* Disable sidebar on mobile */
+                            if (window.innerWidth &lt; 992) {
+                                return;
+                            }
+
+                            const jobId = this.dataset.id;
+
+                            /* Remove active class */
+                            jobCards.forEach(c => c.classList.remove("active-job"));
+
+                            /* Add active class */
+                            this.classList.add("active-job");
+
+                            loadJob(jobId);
+
+                        });
+
+                    });
+
+
+                    /* Auto select first job on desktop */
+                    if (jobCards.length > 0 &amp;&amp; window.innerWidth >= 992) {
+
+                        const firstJob = jobCards[0];
+
+                        firstJob.classList.add("active-job");
+
+                        loadJob(firstJob.dataset.id);
+
+                    }
+
+                });
+            </script>
+
+
+            <!-- STYLES -->
+            <style>
+
+                .bg-soft {
+                    background: #f5f7fb;
+                }
+
+                .career-hero {
+                    background: #1e293b;
+                    padding: 80px 0;
+                }
+
+                .job-card {
+                    border-radius: 12px;
+                    cursor: pointer;
+                    transition: all 0.25s;
+                }
+
+                .job-card:hover {
+                    transform: translateY(-4px);
+                    box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+                }
+
+                .job-card.active-job {
+                    border-left: 5px solid #1e293b;
+                    background: #f8fafc;
+                }
+
+                .job-detail-panel {
+                    background: white;
+                    border-radius: 14px;
+                    height: 600px;
+                    overflow-y: auto;
+                    position: sticky;
+                    top: 40px;
+                }
+
+                .btn-career {
+                    background: #1e293b;
+                    color: white;
+                    border-radius: 8px;
+                }
+
+                .btn-career:hover {
+                    background: #0f172a;
+                    color: white;
+                }
+
+            </style>
+
+        </t>
+    </template>
+
+
+
+    <!-- RIGHT PANEL TEMPLATE -->
+    <template id="job_detail_sidebar">
+
+        <h4 class="fw-bold mb-3">
+            <t t-esc="job.name"/>
+        </h4>
+
+        <div class="mt-4 d-grid gap-2">
+
+            <a class="btn btn-career"
+               t-att-href="'/jobs/' + str(job.id)">
+                View Details
+            </a>
+
+            <a class="btn btn-outline-dark"
+               t-att-href="'/jobs/apply/' + str(job.id)">
+                Apply
+            </a>
+
+        </div>
+
+        <p class="text-muted mt-3">
+            <i class="fa fa-building me-2"/>
+            <t t-esc="job.project_id.name"/>
+        </p>
+
+        <hr/>
+
+        <p>
+            <strong>Open Positions:</strong>
+            <t t-esc="job.opened_positions"/>
+        </p>
+
+        <p>
+            <strong>Closed Positions:</strong>
+            <t t-esc="job.closed_positions"/>
+        </p>
+
+        <p>
+            <strong>Status:</strong>
+            <t t-esc="job.position_state.upper()"/>
+        </p>
+
+        <p>
+            <strong>Description:</strong>
+        </p>
+
+        <t t-if="job.description">
+            <t t-raw="job.description"/>
+        </t>
+
+        <t t-if="not job.description">
+            <p>No description available.</p>
+        </t>
+
+    </template>
+
+    <template id="job_detail_page" name="Job Detail Page">
+        <t t-call="website.layout">
+
+            <!-- HERO -->
+            <section class="career-hero text-white text-center">
+                <div class="container">
+
+                    <h1 class="display-5 fw-bold">
+                        <t t-esc="job.name"/>
+                    </h1>
+
+                    <p class="lead mt-3">
+                        <i class="fa fa-building me-2"/>
+                        <t t-esc="job.project_id.name"/>
+                    </p>
+
+                </div>
+            </section>
+
+
+            <!-- JOB DETAILS -->
+            <section class="py-5 bg-soft">
+                <div class="container">
+
+                    <div class="row">
+
+                        <!-- LEFT CONTENT -->
+                        <div class="col-lg-8">
+
+                            <div class="card border-0 shadow-sm mb-4">
+
+                                <div class="card-body">
+
+                                    <h4 class="fw-bold mb-3">
+                                        Job Description
+                                    </h4>
+
+                                    <div class="text-muted">
+
+                                        <t t-if="job.description">
+                                            <t t-raw="job.description"/>
+                                        </t>
+
+                                        <t t-if="not job.description">
+                                            <p>No description available.</p>
+                                        </t>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- RIGHT SIDEBAR -->
+                        <div class="col-lg-4">
+
+                            <div class="card border-0 shadow-sm">
+
+                                <div class="card-body">
+
+                                    <h5 class="fw-bold mb-4">
+                                        Job Overview
+                                    </h5>
+
+
+                                    <!-- Company -->
+                                    <div class="mb-3">
+                                        <i class="fa fa-building text-primary me-2"/>
+                                        <strong>Company:</strong>
+                                        <t t-esc="job.project_id.name"/>
+                                    </div>
+
+
+                                    <!-- Open -->
+                                    <div class="mb-3">
+                                        <i class="fa fa-users text-success me-2"/>
+                                        <strong>Open Positions:</strong>
+                                        <t t-esc="job.opened_positions"/>
+                                    </div>
+
+
+                                    <!-- Closed -->
+                                    <div class="mb-3">
+                                        <i class="fa fa-check-circle text-secondary me-2"/>
+                                        <strong>Closed Positions:</strong>
+                                        <t t-esc="job.closed_positions"/>
+                                    </div>
+
+
+                                    <!-- Status -->
+                                    <div class="mb-4">
+
+                                        <strong>Status:</strong>
+
+                                        <span t-att-class="
+                                            'badge rounded-pill ms-2 px-3 py-2 ' +
+                                            ('badge-open' if job.position_state == 'open'
+                                             else 'badge-paused' if job.position_state == 'paused'
+                                             else 'badge-closed')
+                                        ">
+                                            <t t-esc="job.position_state.upper()"/>
+                                        </span>
+
+                                    </div>
+
+
+                                    <!-- APPLY BUTTON -->
+                                    <a class="btn btn-career w-100"
+                                       t-att-href="'/jobs/apply/' + str(job.id)">
+                                        Apply for this Job
+                                    </a>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </section>
+
+
+            <!-- STYLE -->
+            <style>
+
+                .bg-soft{
+                    background:#f5f7fb;
+                }
+
+                .career-hero{
+                    background:#1e293b;
+                    padding:80px 0;
+                }
+
+                .btn-career{
+                    background:#1e293b;
+                    color:white;
+                    border-radius:8px;
+                    font-weight:500;
+                    padding:10px;
+                }
+
+                .btn-career:hover{
+                    background:#0f172a;
+                    color:white;
+                }
+
+                .badge-open{
+                    background:#16a34a;
+                    color:white;
+                }
+
+                .badge-paused{
+                    background:#f59e0b;
+                    color:white;
+                }
+
+                .badge-closed{
+                    background:#6b7280;
+                    color:white;
+                }
+
+            </style>
+
+        </t>
+    </template>
+
+    <template id="job_apply_page" name="Job Apply Page">
+        <t t-call="website.layout">
+
+            <!-- HERO -->
+            <section class="career-hero text-white text-center">
+                <div class="container">
+
+                    <h1 class="fw-bold">
+                        Apply for
+                        <t t-esc="job.name"/>
+                    </h1>
+
+                    <p class="lead">
+                        <i class="fa fa-building me-2"/>
+                        <t t-esc="job.project_id.name"/>
+                    </p>
+
+                </div>
+            </section>
+
+
+            <!-- APPLY FORM -->
+            <section class="py-5 bg-soft">
+
+                <div class="container">
+
+                    <div class="row justify-content-center">
+
+                        <div class="col-lg-8">
+
+                            <div class="card shadow-sm border-0">
+
+                                <div class="card-body p-4">
+
+                                    <h4 class="fw-bold mb-4">
+                                        Submit Your Application
+                                    </h4>
+
+                                    <t t-if="error">
+                                        <div class="alert alert-danger">
+                                            <t t-esc="error"/>
+                                        </div>
+                                    </t>
+
+
+                                    <form action="/jobs/apply/submit"
+                                          method="post"
+                                          enctype="multipart/form-data">
+
+                                        <input type="hidden"
+                                               name="csrf_token"
+                                               t-att-value="request.csrf_token()"/>
+
+                                        <input type="hidden"
+                                               name="job_id"
+                                               t-att-value="job.id"/>
+
+
+                                        <!-- NAME -->
+                                        <div class="mb-3">
+
+                                            <label class="form-label">
+                                                Full Name <span class="required">*</span>
+                                            </label>
+
+                                            <input type="text"
+                                                   name="name"
+                                                   class="form-control"
+                                                   placeholder="Full Name"
+                                                   required="required"/>
+
+                                        </div>
+
+
+                                        <!-- EMAIL -->
+                                        <div class="mb-3">
+
+                                            <label class="form-label">
+                                                Email <span class="required">*</span>
+                                            </label>
+
+                                            <input type="email"
+                                                   name="email"
+                                                   class="form-control"
+                                                   placeholder="Email"
+                                                   required="required"/>
+
+                                        </div>
+
+
+                                        <!-- PHONE -->
+                                        <div class="mb-3">
+
+                                            <label class="form-label">
+                                                Phone <span class="required">*</span>
+                                            </label>
+
+                                            <input type="text"
+                                                   name="phone"
+                                                   required="required"
+                                                   pattern="^\+?[0-9\s\-]{7,15}$"
+                                                   placeholder="Phone"
+                                                   class="form-control"/>
+
+                                        </div>
+
+                                        <div class="mb-3">
+
+                                            <label class="form-label">
+                                                Alternate Phone <span class="required">*</span>
+                                            </label>
+
+                                            <input type="text"
+                                                   name="alt_phone"
+                                                   required="required"
+                                                   pattern="^\+?[0-9\s\-]{7,15}$"
+                                                   placeholder="Alternate Phone"
+                                                   class="form-control"/>
+
+                                        </div>
+
+
+                                        <!-- RESUME -->
+                                        <div class="mb-3">
+
+                                            <label class="form-label">
+                                                Upload Resume <span class="required">*</span>
+                                            </label>
+
+                                            <input type="file"
+                                                   name="resume"
+                                                   class="form-control"
+                                                   required="required"/>
+
+                                        </div>
+
+                                        <!-- LINKEDIN -->
+                                        <div class="mb-3">
+
+                                            <label class="form-label">
+                                                LinkedIn Profile
+                                            </label>
+
+                                            <input type="url"
+                                                   name="linkedin"
+                                                   class="form-control"
+                                                   placeholder="https://www.linkedin.com/in/your-profile"
+                                                   pattern="https?://(www\.)?linkedin\.com/.*"
+                                                   title="Enter a valid LinkedIn profile URL"/>
+
+                                        </div>
+
+
+                                        <!-- COVER LETTER -->
+                                        <div class="mb-4">
+
+                                            <label class="form-label">
+                                                Cover Letter
+                                            </label>
+
+                                            <textarea name="cover_letter"
+                                                      class="form-control"
+                                                      placeholder="Cover Letter"
+                                                      rows="5"/>
+
+                                        </div>
+
+
+                                        <!-- SUBMIT -->
+                                        <button type="submit"
+                                                class="btn btn-career w-100">
+
+                                            Submit Application
+
+                                        </button>
+                                        <div class="mt-3"
+                                             style="display: flex; align-items: center; justify-content: center; padding: 4px 8px; border: 1px solid #0A66C2; color: #0A66C2; font-weight: 600; border-radius: 4px; cursor: pointer; width: max-content; transition: background-color 0.3s;"
+                                             onmouseover="this.style.backgroundColor='#E6F0FA'"
+                                             onclick="window.location.href='/linkedin/login'"
+                                             onmouseout="this.style.backgroundColor='transparent'">
+                                            <img src="/ats_website_jobs/static/src/img/linkedin.png"
+                                                 alt="LinkedIn"
+                                                 style="width: 34px; height: 34px; margin-right: 4px;"/>
+                                            Login with LinkedIn
+                                        </div>
+
+                                    </form>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- STYLE -->
+            <style>
+                .bg-soft{
+                    background:#f5f7fb;
+                }
+
+                .career-hero{
+                    background:#1e293b;
+                    padding:70px 0;
+                }
+                .required{
+                    color:#dc3545;
+                    font-weight:bold;
+                    margin-left:2px;
+                }
+
+                .btn-career{
+                    background:#1e293b;
+                    color:white;
+                    border-radius:8px;
+                    font-weight:500;
+                    padding:12px;
+                }
+
+                .btn-career:hover{
+                    background:#0f172a;
+                    color:white;
+                }
+
+            </style>
+
+        </t>
+    </template>
+
+
+    <template id="apply_page" name="General Job Application">
+        <t t-call="website.layout">
+
+            <!-- HERO -->
+            <section class="career-hero text-white text-center">
+                <div class="container">
+
+                    <h1 class="fw-bold">
+                        Submit Your Application
+                    </h1>
+
+                    <p class="lead">
+                        Join our team and grow your career with us
+                    </p>
+
+                </div>
+            </section>
+
+
+            <!-- APPLY FORM -->
+            <section class="py-5 bg-soft">
+
+                <div class="container">
+
+                    <div class="row justify-content-center">
+
+                        <div class="col-lg-8">
+
+                            <div class="card shadow-sm border-0">
+
+                                <div class="card-body p-4">
+
+                                    <h4 class="fw-bold mb-4">
+                                        Candidate Information
+                                    </h4>
+
+
+                                    <!-- ERROR MESSAGE -->
+                                    <t t-if="error">
+                                        <div class="alert alert-danger">
+                                            <t t-esc="error"/>
+                                        </div>
+                                    </t>
+
+
+                                    <form action="/apply/submit"
+                                          method="post"
+                                          enctype="multipart/form-data">
+
+                                        <!-- CSRF TOKEN -->
+                                        <input type="hidden"
+                                               name="csrf_token"
+                                               t-att-value="request.csrf_token()"/>
+
+
+                                        <!-- NAME -->
+                                        <div class="mb-3">
+
+                                            <label class="form-label">
+                                                Full Name
+                                                <span class="required">*</span>
+                                            </label>
+
+                                            <input type="text"
+                                                   name="name"
+                                                   class="form-control"
+                                                   placeholder="Full Name"
+                                                   required="required"/>
+
+                                        </div>
+
+
+                                        <!-- EMAIL -->
+                                        <div class="mb-3">
+
+                                            <label class="form-label">
+                                                Email
+                                                <span class="required">*</span>
+                                            </label>
+
+                                            <input type="email"
+                                                   name="email"
+                                                   class="form-control"
+                                                   placeholder="Email"
+                                                   required="required"/>
+
+                                        </div>
+
+
+                                        <!-- PHONE -->
+                                        <div class="mb-3">
+
+                                            <label class="form-label">
+                                                Phone
+                                                <span class="required">*</span>
+                                            </label>
+
+                                            <input type="text"
+                                                   name="phone"
+                                                   class="form-control"
+                                                   placeholder="Phone Number"
+                                                   pattern="^\+?[0-9\s\-]{7,15}$"
+                                                   required="required"/>
+
+                                        </div>
+
+
+                                        <!-- ALT PHONE -->
+                                        <div class="mb-3">
+
+                                            <label class="form-label">
+                                                Alternate Phone
+                                            </label>
+
+                                            <input type="text"
+                                                   name="alt_phone"
+                                                   class="form-control"
+                                                   placeholder="Alternate Phone"
+                                                   pattern="^\+?[0-9\s\-]{7,15}$"/>
+
+                                        </div>
+
+
+                                        <!-- LINKEDIN -->
+                                        <div class="mb-3">
+
+                                            <label class="form-label">
+                                                LinkedIn Profile
+                                            </label>
+
+                                            <input type="url"
+                                                   name="linkedin"
+                                                   class="form-control"
+                                                   placeholder="https://linkedin.com/in/username"/>
+
+                                        </div>
+
+
+                                        <!-- RESUME -->
+                                        <div class="mb-3">
+
+                                            <label class="form-label">
+                                                Upload Resume
+                                                <span class="required">*</span>
+                                            </label>
+
+                                            <input type="file"
+                                                   name="resume"
+                                                   class="form-control"
+                                                   required="required"/>
+
+                                        </div>
+
+
+                                        <!-- COVER LETTER -->
+                                        <div class="mb-4">
+
+                                            <label class="form-label">
+                                                Cover Letter
+                                            </label>
+
+                                            <textarea name="cover_letter"
+                                                      class="form-control"
+                                                      rows="5"
+                                                      placeholder="Write a short introduction...">
+                                            </textarea>
+
+                                        </div>
+
+
+                                        <!-- SUBMIT BUTTON -->
+                                        <button type="submit"
+                                                class="btn btn-career w-100">
+
+                                            Submit Application
+
+                                        </button>
+
+
+                                    </form>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- STYLE -->
+            <style>
+
+                .bg-soft{
+                    background:#f5f7fb;
+                }
+
+                .career-hero{
+                    background:#1e293b;
+                    padding:80px 0;
+                }
+
+                .required{
+                    color:#dc3545;
+                    font-weight:bold;
+                    margin-left:2px;
+                }
+
+                .btn-career{
+                    background:#1e293b;
+                    color:white;
+                    border-radius:8px;
+                    font-weight:500;
+                    padding:12px;
+                }
+
+                .btn-career:hover{
+                    background:#0f172a;
+                    color:white;
+                }
+
+            </style>
+
+        </t>
+    </template>
+
+    <template id="job_apply_success_page" name="Job Application Success">
+        <t t-call="website.layout">
+
+            <section class="py-5 bg-soft">
+
+                <div class="container">
+
+                    <div class="row justify-content-center">
+
+                        <div class="col-lg-6">
+
+                            <div class="card shadow-sm border-0 text-center">
+
+                                <div class="card-body p-5">
+
+                                    <i class="fa fa-check-circle text-success"
+                                       style="font-size:70px;"></i>
+
+                                    <h3 class="fw-bold mt-3">
+                                        Application Submitted Successfully
+                                    </h3>
+
+                                    <p class="text-muted mt-2">
+                                        Thank you for applying. Our HR team will review your
+                                        application and contact you if shortlisted.
+                                    </p>
+
+                                    <a href="/jobs"
+                                       class="btn btn-career mt-3">
+                                        Back to Jobs
+                                    </a>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <style>
+
+                .bg-soft{
+                    background:#f5f7fb;
+                }
+
+                .btn-career{
+                    background:#1e293b;
+                    color:white;
+                    border-radius:8px;
+                    padding:10px 20px;
+                }
+
+                .btn-career:hover{
+                    background:#0f172a;
+                    color:white;
+                }
+
+            </style>
+
+        </t>
+    </template>
+
+    <template id="privacy_policy" name="Privacy Policy">
+      <t t-name="website.privacy_policy">
+        <div class="container mt-5">
+          <h1>Privacy Policy</h1>
+          <p>This site collects LinkedIn profile info for job applications only. We do not share your data.</p>
+        </div>
+      </t>
+    </template>
+
+</odoo>

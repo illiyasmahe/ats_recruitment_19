@@ -51,6 +51,11 @@
                                    widget="pdf_viewer" required="1" readonly="is_stage_readonly"/>
 
                         </page>
+                        <page string="Description">
+
+                            <field name="description" placeholder="Write your Cover Letter here..." readonly="is_stage_readonly" string="Cover Letter"/>
+
+                        </page>
 
                         <page string="Evaluation">
 
