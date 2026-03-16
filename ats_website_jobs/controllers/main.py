@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #############################################################################
+import requests
 
 #    Alhodood Technologies.
 #
@@ -20,45 +21,46 @@
 #
 #############################################################################
 from odoo import http
+from werkzeug.urls import url_encode
 from urllib.parse import quote
 import base64
 from odoo.http import request
 from odoo.addons.website.controllers.main import QueryURL
 from odoo.addons.portal.controllers.portal import pager
+import secrets
 
 class AtsWebsiteJobs(http.Controller):
-    REDIRECT_URI = '/linkedin/callback'
-
 
     @http.route('/linkedin/login', type='http', auth='public', website=True)
     def linkedin_login(self):
-        # Read values from settings
         config = request.env['res.config.settings'].sudo().get_values()
         client_id = config.get('linkedin_client_id')
         redirect_uri = config.get('linkedin_redirect_uri')
 
-        if not client_id or not redirect_uri:
-            return "LinkedIn OAuth is not configured in settings."
+        state = secrets.token_urlsafe(16)
+        request.session['linkedin_oauth_state'] = state
 
-        # Make sure redirect_uri is URL-encoded
-        redirect_uri_encoded = quote(redirect_uri, safe='')
-
-        # Build LinkedIn auth URL
         url = (
             f"https://www.linkedin.com/oauth/v2/authorization?"
             f"response_type=code&client_id={client_id}"
-            f"&redirect_uri={redirect_uri_encoded}"
-            f"&scope=r_liteprofile%20r_emailaddress"
+            f"&redirect_uri={quote(redirect_uri, safe='')}"
+            f"&state={state}"
+            f"&scope=openid%20profile%20email%20w_member_social"
         )
-
-        return request.redirect(url)
+        return url
 
     @http.route('/linkedin/callback', type='http', auth='public', website=True)
-    def linkedin_callback(self, code=None, **kw):
-        if not code:
-            return "Authorization failed"
+    def linkedin_callback(self, code=None, state=None, **kw):
+        import requests
 
-        # Read values from settings
+        if not code:
+            return "<h3>Authorization failed: missing code</h3>"
+
+        # # Verify state to prevent CSRF
+        # if state != request.session.get('linkedin_oauth_state'):
+        #     return "<h3>Invalid state</h3>"
+
+        # Read LinkedIn app settings
         config = request.env['res.config.settings'].sudo().get_values()
         client_id = config.get('linkedin_client_id')
         client_secret = config.get('linkedin_client_secret')
@@ -66,32 +68,70 @@ class AtsWebsiteJobs(http.Controller):
 
         # Exchange code for access token
         token_url = "https://www.linkedin.com/oauth/v2/accessToken"
-        data = {
+        token_resp = requests.post(token_url, data={
             'grant_type': 'authorization_code',
             'code': code,
             'redirect_uri': redirect_uri,
             'client_id': client_id,
             'client_secret': client_secret,
-        }
-        import requests
-        response = requests.post(token_url, data=data).json()
-        access_token = response.get('access_token')
+        }).json()
+
+        access_token = token_resp.get('access_token')
+        config_settings = request.env['res.config.settings'].sudo().create({})
+
+        # Assign the field value
+        config_settings.linkedin_access_token = access_token
+
+        # Call set_values() without arguments
+        config_settings.set_values()
 
         if not access_token:
-            return "Failed to get access token"
+            err_desc = token_resp.get('error_description') or token_resp.get('error')
+            return f"<h3>Failed to get access token: {err_desc}</h3>"
+
+        return request.render('ats_website_jobs.linkedin_verify_success_page')
+
+    @http.route('/linkedin/signup', type='http', auth='public', website=True)
+    def linkedin_signup(self):
+        config = request.env['res.config.settings'].sudo().get_values()
+        access_token = config.get('linkedin_access_token')
+
+        if not access_token:
+            return f"<h3>Failed to get access token</h3>"
 
         headers = {'Authorization': f'Bearer {access_token}'}
-        profile = requests.get('https://api.linkedin.com/v2/me', headers=headers).json()
-        email = requests.get(
-            'https://api.linkedin.com/v2/emailAddress?q=members&projection=(elements*(handle~))',
-            headers=headers
-        ).json()
 
-        return request.render('ats_website_jobs.apply_page', {
-            'name': profile.get('localizedFirstName', '') + ' ' + profile.get('localizedLastName', ''),
-            'email': email['elements'][0]['handle~']['emailAddress'],
-            'linkedin': profile.get('id'),
-        })
+        # Fetch member info from userinfo endpoint
+        userinfo = requests.get('https://api.linkedin.com/v2/userinfo', headers=headers).json()
+
+        # Extract fields safely
+        name = userinfo.get('name', '')
+        first_name = userinfo.get('given_name', '')
+        last_name = userinfo.get('family_name', '')
+        email = userinfo.get('email', '')  # may be empty if not verified
+        linkedin_id = userinfo.get('sub', '')
+        picture = userinfo.get('picture', '')
+        email_verified = userinfo.get('email_verified', '')
+
+        # Send data back to parent popup
+        return f"""
+                    <script>
+                        if(window.opener){{
+                            window.opener.postMessage({{
+                                linkedinProfile: {{
+                                    name: "{name}",
+                                    email: "{email}",
+                                    email_verified: "{email_verified}",
+                                    sub: "{linkedin_id}",
+                                    picture: "{picture}",
+                                }}
+                            }}, window.location.origin);
+                            window.close();
+                        }} else {{
+                            document.body.innerHTML = "<h3>Cannot communicate with parent window</h3>";
+                        }}
+                    </script>
+                """
 
     @http.route(['/jobs', '/jobs/page/<int:page>'], type='http', auth='public', website=True)
     def job_list(self, page=1, search='', **kw):
@@ -160,9 +200,15 @@ class AtsWebsiteJobs(http.Controller):
 
         job = request.env['project.task'].sudo().browse(job_id)
 
+        # Fetch system parameter for LinkedIn signup
+        signup_with_linkedin = request.env['ir.config_parameter'].sudo().get_param('ats_website_jobs.signup_with_linkedin') == 'True'
+
         return request.render(
             'ats_website_jobs.job_apply_page',
-            {'job': job}
+            {
+                'job': job,
+                'signup_with_linkedin': signup_with_linkedin,  # pass to template
+            }
         )
 
     # Submit application
@@ -178,6 +224,23 @@ class AtsWebsiteJobs(http.Controller):
         alt_phone = post.get('alt_phone')
         linkedin = post.get('linkedin')
         cover_letter = post.get('cover_letter')
+
+        linkedin_sub = post.get('linkedin_sub')
+        linkedin_picture = post.get('linkedin_picture')
+        linkedin_verified = post.get('linkedin_email_verified')
+
+        # 🚀 If LinkedIn registration → redirect confirm page
+        if linkedin_sub:
+            params = {
+                'job_id': job_id,
+                'name': name,
+                'email': email,
+                'picture': linkedin_picture,
+                'sub': linkedin_sub,
+                'email_verified': linkedin_verified,
+            }
+
+            return request.redirect('/jobs/apply/confirm?' + url_encode(params))
 
         Applicant = request.env['ats.applicant'].sudo()
 
@@ -226,13 +289,66 @@ class AtsWebsiteJobs(http.Controller):
             'email': email,
             'mobile': phone,
             'mobile2': alt_phone,
-            'linkedin': linkedin,
+            'linkedin_url': linkedin,
             'description': cover_letter,
             'task_id': int(job_id),
             'resume': resume_data,
             'resume_filename': resume_filename,
         })
 
+        return request.render("ats_website_jobs.job_apply_success_page")
+
+    @http.route('/jobs/apply/confirm', type='http', auth='public', website=True)
+    def linkedin_confirm(self, **kw):
+
+        return request.render(
+            "ats_website_jobs.job_application_confirmation",
+            {
+                'job_id': kw.get('job_id'),
+                'name': kw.get('name'),
+                'email': kw.get('email'),
+                'picture': kw.get('picture'),
+                'sub': kw.get('sub'),
+                'email_verified': kw.get('email_verified'),
+            }
+        )
+
+    @http.route('/jobs/linkedin/confirm', type='http', auth='public', methods=['POST'], website=True, csrf=True)
+    def linkedin_confirm_submit(self, **post):
+
+        job_id = post.get('job_id')
+        name = post.get('name')
+        email = post.get('email')
+        phone = post.get('phone')
+        alt_phone = post.get('alt_phone')
+        linkedin = post.get('linkedin')
+        cover_letter = post.get('cover_letter')
+
+        Applicant = request.env['ats.applicant'].sudo()
+
+        # HANDLE RESUME
+        resume_file = request.httprequest.files.get('resume')
+        resume_data = False
+        resume_filename = False
+
+        if resume_file:
+            resume_data = base64.b64encode(resume_file.read())
+            resume_filename = resume_file.filename
+
+        # CREATE APPLICANT
+        Applicant.create({
+            'name': name,
+            'email': email,
+            'mobile': phone,
+            'mobile2': alt_phone,
+            'linkedin_url': linkedin,
+            'description': cover_letter,
+            'task_id': int(job_id) if job_id else False,
+            'resume': resume_data,
+            'resume_filename': resume_filename,
+        })
+
+        # SHOW SUCCESS PAGE
         return request.render("ats_website_jobs.job_apply_success_page")
 
     # Thank you page

@@ -27,6 +27,9 @@ class LinkedinSettings(models.TransientModel):
     linkedin_client_id = fields.Char(string="LinkedIn Client ID")
     linkedin_client_secret = fields.Char(string="LinkedIn Client Secret")
     linkedin_redirect_uri = fields.Char(string="LinkedIn Redirect URI")
+    linkedin_access_token = fields.Char(string="LinkedIn Access Token")
+
+    signup_with_linkedin = fields.Boolean(string="Sign up with LinkedIn")
 
     def get_values(self):
         res = super().get_values()
@@ -35,6 +38,8 @@ class LinkedinSettings(models.TransientModel):
             linkedin_client_id=IrConfig.get_param('ats_website_jobs.linkedin_client_id'),
             linkedin_client_secret=IrConfig.get_param('ats_website_jobs.linkedin_client_secret'),
             linkedin_redirect_uri=IrConfig.get_param('ats_website_jobs.linkedin_redirect_uri'),
+            linkedin_access_token=IrConfig.get_param('ats_website_jobs.linkedin_access_token'),
+            signup_with_linkedin=IrConfig.get_param('ats_website_jobs.signup_with_linkedin'),
         )
         return res
 
@@ -44,3 +49,5 @@ class LinkedinSettings(models.TransientModel):
         IrConfig.set_param('ats_website_jobs.linkedin_client_id', self.linkedin_client_id or '')
         IrConfig.set_param('ats_website_jobs.linkedin_client_secret', self.linkedin_client_secret or '')
         IrConfig.set_param('ats_website_jobs.linkedin_redirect_uri', self.linkedin_redirect_uri or '')
+        IrConfig.set_param('ats_website_jobs.linkedin_access_token', self.linkedin_access_token or '')
+        IrConfig.set_param('ats_website_jobs.signup_with_linkedin', self.signup_with_linkedin or '')

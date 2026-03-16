@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="view_task_form_linkedin_post" model="ir.ui.view">
+        <field name="name">project.task.form.linkedin.post</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_form2"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//header" position="inside">
+
+                <button name="action_post_linkedin"
+                        type="object"
+                        string="Publish to LinkedIn"
+                        invisible="linkedin_status =='published'"
+                        class="btn-primary"/>
+                <button name="action_unpublish_linkedin"
+                        type="object"
+                        string="Unpublish From LinkedIn"
+                        invisible="linkedin_status =='not_published'"
+                        class="btn-primary"/>
+
+            </xpath>
+            <xpath expr="//field[@name='tag_ids']" position="after">
+                <field name="linkedin_status" widget="badge" decoration-success="linkedin_status == 'published'"/>
+            </xpath>
+
+            <xpath expr="//notebook" position="inside">
+                <page string="LinkedIn">
+                    <group>
+                        <field name="linkedin_post_id" readonly="1"/>
+                        <field name="linkedin_author_type"/>
+                        <field name="linkedin_author_urn"/>
+                        <field name="linkedin_text"/>
+                        <field name="linkedin_apply_link"/>
+                        <field name="linkedin_share_media_category"/>
+                        <field name="linkedin_visibility"/>
+                    </group>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

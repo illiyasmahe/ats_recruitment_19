@@ -6,23 +6,25 @@
         <field name="inherit_id" ref="website.res_config_settings_view_form"/>
         <field name="arch" type="xml">
             <!-- Insert a new block under the sheet -->
-            <xpath expr="//block[@id='website_info_settings']" position="inside">
-                <setting>
-                    <div class="content-group">
-                        <div class="row mt16">
-                            <label class="col-lg-6 o_light_label" string="Client ID" for="linkedin_client_id"/>
+            <xpath expr="//block[@id='website_info_settings']" position="after">
+                <block title="Linkedin" id="website_linkedin_settings">
+                        <setting string="Client ID"
+                                 >
                             <field name="linkedin_client_id"/>
-                        </div>
-                        <div class="row mt16">
-                            <label class="col-lg-6 o_light_label" string="Client Secret" for="linkedin_client_secret"/>
+                        </setting>
+                        <setting string="Client Secret">
                             <field name="linkedin_client_secret"/>
-                        </div>
-                        <div class="row mt16">
-                            <label class="col-lg-6 o_light_label" string="Redirect URL" for="linkedin_redirect_uri"/>
+                        </setting>
+                        <setting string="Redirect URL">
                             <field name="linkedin_redirect_uri" placeholder="https://yourdomain.com/linkedin/callback"/>
-                        </div>
-                    </div>
-                </setting>
+                        </setting>
+<!--                        <setting string="Signup With Linkedin">-->
+<!--                            <field name="signup_with_linkedin"/>-->
+<!--                        </setting>-->
+                        <setting string="Access Token">
+                            <field name="linkedin_access_token" readonly="1"/>
+                        </setting>
+                </block>
             </xpath>
         </field>
     </record>

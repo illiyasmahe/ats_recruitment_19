@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+<!-- Wizard Form View -->
+    <record id="view_linkedin_verify_wizard_form" model="ir.ui.view">
+        <field name="name">linkedin.verify.wizard.form</field>
+        <field name="model">linkedin.verify.wizard</field>
+        <field name="arch" type="xml">
+            <form string="LinkedIn Verification">
+                <group>
+                    <field name="show_message" readonly="1"/>
+                </group>
+                <footer>
+                    <button string="Verify LinkedIn" type="object"
+                            name="action_open_linkedin" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_linkedin_verify_wizard" model="ir.actions.act_window">
+        <field name="name">LinkedIn Verification</field>
+        <field name="res_model">linkedin.verify.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem id="menu_linkedin_verification"
+              name="LinkedIn Verification"
+              parent="ats_tracking.menu_ats_configuration"
+              action="action_linkedin_verify_wizard"
+              sequence="10"/>
+</odoo>

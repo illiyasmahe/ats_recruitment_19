@@ -30,9 +30,12 @@
     'description': 'Recruitment Maanagement ',
     'depends': ['website','project','ats_tracking'],
     'data': [
+        'security/ir.model.access.csv',
         'views/website_menu.xml',
         'views/job_templates.xml',
         'views/res_config_settings_view.xml',
+        'views/project_task.xml',
+        'wizard/linkdin_verify_wizard.xml',
     ],
     'demo': [
     ],
