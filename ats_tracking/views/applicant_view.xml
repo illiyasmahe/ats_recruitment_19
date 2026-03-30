@@ -8,9 +8,31 @@
             <form string="Applicant">
                 <header>
                     <field name="stage_id" widget="statusbar" options="{'clickable': '1'}"/>
+                    <button name="send_offer_email" type="object" string="Send"/>
                 </header>
 
                 <sheet>
+
+                    <!-- Green -->
+                    <widget name="web_ribbon"
+                        bg_color="bg-success"
+                            text="🔥 Strong Match"
+                        invisible="score &lt; 70">
+                    </widget>
+
+                    <!-- Yellow -->
+                    <widget name="web_ribbon"
+                        bg_color="bg-warning"
+                            text="Medium"
+                        invisible="score &lt; 40 or score &gt;= 70">
+                    </widget>
+
+                    <!-- Red -->
+                    <widget name="web_ribbon"
+                        bg_color="bg-danger"
+                            text="❌ Weak"
+                        invisible="score &gt;= 40">
+                    </widget>
                     <div class="o_row d-flex justify-content-end mb-2">
                         <field name="invoice_status"
                                widget="badge"
@@ -24,7 +46,13 @@
                             <field name="name" readonly="is_stage_readonly"/>
                             <field name="task_id" readonly="is_stage_readonly"/>
                             <field name="recruiter_id" readonly="is_stage_readonly"/>
-                            <field name="interview_status" readonly="1" string="Status"/>
+                            <field name="interview_status" readonly="1" string="Application Status" widget="badge"
+                                   decoration-success="interview_status == 'hired'"
+                                        decoration-danger="interview_status == 'rejected'"/>
+                            <field name="location_url" readonly="is_stage_readonly" string="Location URL"/>
+                            <field name="mail_status" readonly="is_stage_readonly" string="Mail To Applicant" widget="badge"
+                            decoration-success="mail_status == 'accepted'"
+                                        decoration-danger="mail_status == 'rejected'"/>
                         </group>
 
                         <group>
@@ -32,13 +60,17 @@
                             <field name="mobile" readonly="is_stage_readonly"/>
                             <field name="mobile2" string="Alternate Mobile" readonly="is_stage_readonly"/>
                             <field name="email" readonly="is_stage_readonly"/>
+                            <field name="experience_years" readonly="is_stage_readonly"/>
+                            <field name="highest_education" readonly="is_stage_readonly"/>
                             <field name="linkedin_url" readonly="is_stage_readonly"/>
-
+                            <field name="github_url" readonly="is_stage_readonly"/>
+                            <field name="score" widget="progressbar"/>
                         </group>
                     </group>
 
                     <group>
-                        <field name="tag_ids" widget="many2many_tags" readonly="is_stage_readonly"/>
+<!--                        <field name="tag_ids" widget="many2many_tags" readonly="is_stage_readonly"/>-->
+                        <field name="skill_ids" widget="many2many_tags" readonly="is_stage_readonly"/>
 
                     </group>
 
@@ -155,18 +187,33 @@
             <field name="name"/>
             <field name="email"/>
             <field name="mobile"/>
-
+            <field name="global_search_text" string="Global / Description" operator="ilike"/>
+            <separator/>
             <!-- Filters -->
             <filter name="open_tasks" string="Open Tasks"
                     domain="[('task_id.position_state','=','open')]"/>
             <filter name="closed_tasks" string="Closed Tasks"
                     domain="[('task_id.position_state','=','closed')]"/>
+            <separator/>
+
+            <filter name="hired_application" string="Hired"
+                    domain="[('task_stage_is_hired','=',True)]"/>
+
+            <filter name="rejected_application" string="Rejected"
+                    domain="[('task_stage_is_rejected','=',True)]"/>
+            <separator/>
+
+            <filter string="Top 10" name="top_10" domain="[('rank','&lt;=',10)]"/>
+            <filter string="Top 50" name="top_50" domain="[('rank','&lt;=',50)]"/>
+            <filter string="Top 100" name="top_100" domain="[('rank','&lt;=',100)]"/>
+            <filter string="Top 200" name="top_200" domain="[('rank','&lt;=',200)]"/>
+            <filter string="Top 500" name="top_500" domain="[('rank','&lt;=',500)]"/>
 
             <group>
 
                     <filter name="group_stage_id"
-                            string="state"
-                            context="{'group_by':'stage_id'}"/>
+                            string="Invoice"
+                            context="{'group_by':'invoice_status'}"/>
 
                     <filter name="group_task"
                             string="Job Positions"

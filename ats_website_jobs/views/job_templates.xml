@@ -578,12 +578,11 @@
                                         <div class="mb-3">
 
                                             <label class="form-label">
-                                                Alternate Phone <span class="required">*</span>
+                                                Alternate Phone
                                             </label>
 
                                             <input type="text"
                                                    name="alt_phone"
-                                                   required="required"
                                                    pattern="^\+?[0-9\s\-]{7,15}$"
                                                    placeholder="Alternate Phone"
                                                    class="form-control"/>
@@ -618,6 +617,26 @@
                                                    placeholder="https://www.linkedin.com/in/your-profile"
                                                    pattern="https?://(www\.)?linkedin\.com/.*"
                                                    title="Enter a valid LinkedIn profile URL"/>
+
+                                        </div>
+
+                                        <!-- EXPERIENCE -->
+                                        <div class="mb-3">
+
+                                            <label class="form-label">
+                                                Experience (Years)
+                                                <span class="required">*</span>
+                                            </label>
+
+                                            <input type="number"
+                                                   name="experience"
+                                                   class="form-control"
+                                                   placeholder="e.g. 2"
+                                                   min="0"
+                                                   max="20"
+                                                   step="1"
+                                                   value="0"
+                                                   required="required"/>
 
                                         </div>
 
@@ -886,6 +905,26 @@
                                             <input type="file"
                                                    name="resume"
                                                    class="form-control"
+                                                   required="required"/>
+
+                                        </div>
+
+                                        <!-- EXPERIENCE -->
+                                        <div class="mb-3">
+
+                                            <label class="form-label">
+                                                Experience (Years)
+                                                <span class="required">*</span>
+                                            </label>
+
+                                            <input type="number"
+                                                   name="experience"
+                                                   class="form-control"
+                                                   placeholder="e.g. 2"
+                                                   min="0"
+                                                   max="20"
+                                                   step="1"
+                                                   value="0"
                                                    required="required"/>
 
                                         </div>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Accepted -->
+    <template id="ats_tracking.applicant_accept_page" name="Applicant Accept">
+        <t t-call="website.layout">
+            <div class="container mt-5 d-flex justify-content-center">
+                <div class="card text-center p-5 shadow" style="max-width: 500px; border-radius: 12px;">
+                    <div class="card-body">
+                        <h1 class="text-success mb-3">✅ Accepted</h1>
+                        <p class="text-muted">Your response has been recorded as <strong>Accepted</strong>.</p>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- Rejected -->
+    <template id="ats_tracking.applicant_reject_page" name="Applicant Reject">
+        <t t-call="website.layout">
+            <div class="container mt-5 d-flex justify-content-center">
+                <div class="card text-center p-5 shadow" style="max-width: 500px; border-radius: 12px;">
+                    <div class="card-body">
+                        <h1 class="text-danger mb-3">❌ Rejected</h1>
+                        <p class="text-muted">Your response has been recorded as <strong>Rejected</strong>.</p>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- Expired -->
+    <template id="ats_tracking.applicant_expired_page" name="Applicant Expired">
+        <t t-call="website.layout">
+            <div class="container mt-5 d-flex justify-content-center">
+                <div class="card text-center p-5 shadow" style="max-width: 500px; border-radius: 12px; background-color: #fff3cd;">
+                    <div class="card-body">
+                        <h1 class="text-warning mb-3">⚠ Expired</h1>
+                        <p class="text-muted">This link has already been used or is no longer valid.</p>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- Invalid -->
+    <template id="ats_tracking.applicant_invalid_page" name="Invalid Applicant">
+        <t t-call="website.layout">
+            <div class="container mt-5 d-flex justify-content-center">
+                <div class="card text-center p-5 shadow" style="max-width: 500px; border-radius: 12px; background-color: #f8d7da;">
+                    <div class="card-body">
+                        <h1 class="text-danger mb-3">❌ Invalid</h1>
+                        <p class="text-muted">This applicant does not exist.</p>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

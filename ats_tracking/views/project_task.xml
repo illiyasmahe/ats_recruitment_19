@@ -45,6 +45,9 @@
                            readonly="1"/>
 
                     <field name="contact_id" readonly="is_active_stage==True or recruitment_manager_id!=uid"/>
+                    <field name="required_skill_ids" readonly="is_active_stage==True or recruitment_manager_id!=uid" widget="many2many_tags"/>
+                    <field name="min_experience" readonly="is_active_stage==True or recruitment_manager_id!=uid"/>
+                    <field name="education_required" readonly="is_active_stage==True or recruitment_manager_id!=uid"/>
 
                 </group>
                 <group>
@@ -264,6 +267,11 @@
                         string="Closed Jobs"
                         domain="[('position_state','=','closed')]"/>
 
+                <separator/>
+                <filter name="filter_published"
+                        string="Linkedin Published"
+                        domain="[('linkedin_status','=','published')]"/>
+
                 <!-- Group By -->
                 <group>
 
@@ -272,12 +280,12 @@
                             context="{'group_by':'project_id'}"/>
 
                     <filter name="group_recruiter"
-                            string="Recruiter"
+                            string="Manager"
                             context="{'group_by':'recruitment_manager_id'}"/>
 
                     <filter name="group_state"
-                            string="State"
-                            context="{'group_by':'position_state'}"/>
+                            string="Partner"
+                            context="{'group_by':'partner_id'}"/>
 
                 </group>
 

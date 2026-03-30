@@ -107,6 +107,15 @@ class ProjectTask(models.Model):
         compute="_compute_invoiceable_positions"
     )
 
+    required_skill_ids = fields.Many2many("skill.master", string="Required Skills")
+    min_experience = fields.Float("Min Experience")
+    education_required = fields.Char("Education Required")
+
+    linkedin_status = fields.Selection([
+        ('not_published', 'Not Published'),
+        ('published', 'Published')
+    ], string="LinkedIn Status", default='not_published')
+
     @api.depends('invoice_ids')
     def _compute_invoice_count(self):
         for rec in self:

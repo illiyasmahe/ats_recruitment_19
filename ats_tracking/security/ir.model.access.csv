@@ -1,6 +1,7 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_ats_applicant_stage,ats.applicant.stage,model_ats_applicant_stage,,1,1,1,1
 access_ats_applicant,ats.applicant,model_ats_applicant,,1,1,1,1
+access_skill_master,skill.master,model_skill_master,,1,1,1,1
 access_task_team_member_wizard,task.team.member.wizard,model_task_team_member_wizard,,1,1,1,1
 access_task_manager_wizard,task.manager.wizard,model_task_manager_wizard,,1,1,1,1
 access_recruitment_invoice_wizard,recruitment.invoice.wizard,model_recruitment_invoice_wizard,,1,1,1,1

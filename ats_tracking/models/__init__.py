@@ -25,3 +25,4 @@ from . import project_task
 from . import applicant
 from . import account_move
 from . import product
+from . import mail_compose_message

@@ -28,7 +28,7 @@
     'author': 'Alhodood Technologies',
     'summary': 'Recruitment Maanagement',
     'description': 'Recruitment Maanagement ',
-    'depends': ['project','accountant','l10n_ae'],
+    'depends': ['project','accountant','l10n_ae','website','calendar'],
     'data': [
         'security/ir.model.access.csv',
         'security/security.xml',
@@ -38,6 +38,7 @@
         'views/product_view.xml',
         'views/applicant_view.xml',
         'views/account_move_views.xml',
+        'views/web_templates.xml',
         'wizard/task_wizards.xml',
         'wizard/recruitment_invoice_wizard.xml',
     ],

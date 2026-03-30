@@ -224,6 +224,7 @@ class AtsWebsiteJobs(http.Controller):
         alt_phone = post.get('alt_phone')
         linkedin = post.get('linkedin')
         cover_letter = post.get('cover_letter')
+        experience = post.get('experience')
 
         linkedin_sub = post.get('linkedin_sub')
         linkedin_picture = post.get('linkedin_picture')
@@ -290,6 +291,7 @@ class AtsWebsiteJobs(http.Controller):
             'mobile': phone,
             'mobile2': alt_phone,
             'linkedin_url': linkedin,
+            'experience_years': experience,
             'description': cover_letter,
             'task_id': int(job_id),
             'resume': resume_data,
@@ -371,6 +373,7 @@ class AtsWebsiteJobs(http.Controller):
         alt_phone = post.get('alt_phone')
         linkedin = post.get('linkedin')
         cover_letter = post.get('cover_letter')
+        experience = post.get('experience')
 
         Applicant = request.env['ats.applicant'].sudo()
 
@@ -418,6 +421,7 @@ class AtsWebsiteJobs(http.Controller):
             'mobile': phone,
             'mobile2': alt_phone,
             'linkedin_url': linkedin,
+            'experience_years': experience,
             'description': cover_letter,
             'resume': resume_data,
             'resume_filename': resume_filename,
